@@ -5,6 +5,8 @@ require 'yaml'
 class Valvat
   module Lookup
 
+    mattr_accessor :proxy_url
+
     def self.validate(vat, options={})
       vat = Valvat(vat)
       return false unless vat.european?
@@ -37,7 +39,10 @@ class Valvat
         end
         HTTPI.log = false
 
-        Savon::Client.new('http://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl')
+        Savon::Client.new do |wsdl, http|
+          wsdl.document = "http://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl"
+          http.proxy = @@proxy_url if @@proxy_url
+        end
       end
     end
 
